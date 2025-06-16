@@ -17,13 +17,15 @@
         "esbenp.prettier-vscode",
         "mhutchie.git-graph",
         "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.vscode-pylance",
         "oderwat.indent-rainbow",
         "redhat.vscode-yaml",
         "ryanluker.vscode-coverage-gutters"
       ],
       "settings": {
         "[python]": {
-          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.codeActionsOnSave": {
             "source.fixAll": true,
             "source.organizeImports": true
@@ -68,7 +70,9 @@
     },
     "ghcr.io/devcontainers/features/python:1": {
       "installTools": false
-    }
+    },
+    "ghcr.io/devcontainers-extra/features/poetry:2": {},
+    "ghcr.io/prulloac/devcontainer-features/pre-commit:1": {}
   },
   "postCreateCommand": "python3 -m venv .venv && . .venv/bin/activate && (command -v poetry >/dev/null 2>&1 || pip install poetry) && poetry install && pre-commit install"
 }
