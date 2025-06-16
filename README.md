@@ -12,7 +12,6 @@
 
 [![Build Status][build-shield]][build-url]
 [![Typing Status][typing-shield]][typing-url]
-[![Maintainability][maintainability-shield]][maintainability-url]
 [![Code Coverage][codecov-shield]][codecov-url]
 
 
