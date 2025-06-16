@@ -254,3 +254,57 @@ class Budget(DataClassORJSONMixin):
     type: str
     id: str
     attributes: BudgetAttributes
+
+
+@dataclass
+class BillPaidDate(DataClassORJSONMixin):
+    """Model for a Firefly bill paid date."""
+
+    transaction_group_id: str | None = None
+    transaction_journal_id: str | None = None
+    date: str | None = None
+
+
+@dataclass
+class BillAttributes(DataClassORJSONMixin):  # pylint: disable=too-many-instance-attributes
+    """Attributes of a Firefly bill."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    currency_id: str | None = None
+    currency_code: str | None = None
+    currency_symbol: str | None = None
+    currency_decimal_places: int | None = None
+    native_currency_id: str | None = None
+    native_currency_code: str | None = None
+    native_currency_symbol: str | None = None
+    native_currency_decimal_places: int | None = None
+    name: str | None = None
+    amount_min: str | None = None
+    amount_max: str | None = None
+    native_amount_min: str | None = None
+    native_amount_max: str | None = None
+    date: str | None = None
+    end_date: str | None = None
+    extension_date: str | None = None
+    repeat_freq: str | None = None
+    skip: int | None = None
+    active: bool | None = None
+    order: int | None = None
+    notes: str | None = None
+    next_expected_match: str | None = None
+    next_expected_match_diff: str | None = None
+    object_group_id: str | None = None
+    object_group_order: int | None = None
+    object_group_title: str | None = None
+    pay_dates: list[str] | None = None
+    paid_dates: list[BillPaidDate] | None = None
+
+
+@dataclass
+class Bill(DataClassORJSONMixin):
+    """Model for a Firefly bill."""
+
+    type: str
+    id: str
+    attributes: BillAttributes

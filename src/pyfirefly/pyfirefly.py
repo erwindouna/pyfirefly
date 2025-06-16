@@ -20,7 +20,7 @@ from pyfirefly.exceptions import (
     FireflyNotFoundError,
     FireflyTimeoutError,
 )
-from pyfirefly.models import About, Account, Budget, Category, Transaction
+from pyfirefly.models import About, Account, Bill, Budget, Category, Transaction
 
 try:
     VERSION = metadata.version(__package__)
@@ -253,7 +253,7 @@ class Firefly:
         return Category.from_dict(category["data"])
 
     async def get_budgets(self, start: str | None = None, end: str | None = None) -> list[Budget]:
-        """Get budgets for the Firefly server.
+        """Get budgets for the Firefly server. Both start and end dates are required for date range filtering.
 
         Args:
             start: The start date for the budgets.
@@ -264,18 +264,42 @@ class Firefly:
 
         """
         params: dict[str, str] = {}
-        if start:
+        if start and end:
             params["start"] = start
-        if end:
             params["end"] = end
 
         budgets = await self._request(uri="budgets", params=params)
         return [Budget.from_dict(budget) for budget in budgets["data"]]
 
-    @property
-    def api_url(self) -> str:
-        """Return the API URL."""
-        return f"{self._api_scheme}://{self._api_host}:{self._api_port}"
+    async def get_bills(self, start: str | None = None, end: str | None = None) -> list[Bill]:
+        """Get bills for the Firefly server. Both start and end dates are required for date range filtering.
+
+        Args:
+            start: The start date for the bills.
+            end: The end date for the bills.
+
+        Returns:
+            A list of Bill containing bill information.
+
+        """
+        bills: list[dict[str, Any]] = []
+        next_page: int | None = 1
+        params: dict[str, str] = {"page": str(next_page)}
+        if start and end:
+            params["start"] = start
+            params["end"] = end
+
+        while next_page:
+            response = await self._request(uri="bills", params=params)
+            bills.extend(response["data"])
+
+            pagination = response.get("meta", {}).get("pagination", {})
+            current_page = int(pagination.get("current_page", 1) or 1)
+            total_pages = int(pagination.get("total_pages", 1) or 1)
+
+            next_page = current_page + 1 if current_page < total_pages else None
+
+        return [Bill.from_dict(bill) for bill in bills]
 
     async def close(self) -> None:
         """Close open client session."""
