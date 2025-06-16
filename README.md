@@ -45,8 +45,8 @@ async def main() -> None:
         api_url="http://localhost:9000",
         api_key="YOUR_API_KEY",
     ) as firefly:
-        endpoints = await firefly.get_endpoints()
-        print("Firefly Endpoints:", endpoints)
+        about = await firefly.get_about()
+        print("Firefly information:", about)
 
 
 if __name__ == "__main__":
