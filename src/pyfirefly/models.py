@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from mashumaro import field_options
 from mashumaro.mixins.orjson import DataClassORJSONMixin
@@ -84,3 +85,91 @@ class Account(DataClassORJSONMixin):
     type: str
     id: str
     attributes: AccountAttributes
+
+
+@dataclass
+class Transaction(DataClassORJSONMixin):  # pylint: disable=too-many-instance-attributes
+    """Model for a Firefly transaction."""
+
+    user: str | None = None
+    transaction_journal_id: str | None = None
+    type: str | None = None
+    date: str | None = None
+    order: int | None = None
+    currency_id: str | None = None
+    currency_code: str | None = None
+    currency_symbol: str | None = None
+    currency_name: str | None = None
+    currency_decimal_places: int | None = None
+    foreign_currency_id: str | None = None
+    foreign_currency_code: str | None = None
+    foreign_currency_symbol: str | None = None
+    foreign_currency_decimal_places: int | None = None
+    amount: str | None = None
+    foreign_amount: str | None = None
+    description: str | None = None
+    source_id: str | None = None
+    source_name: str | None = None
+    source_iban: str | None = None
+    source_type: str | None = None
+    destination_id: str | None = None
+    destination_name: str | None = None
+    destination_iban: str | None = None
+    destination_type: str | None = None
+    budget_id: str | None = None
+    budget_name: str | None = None
+    category_id: str | None = None
+    category_name: str | None = None
+    bill_id: str | None = None
+    bill_name: str | None = None
+    reconciled: bool | None = None
+    notes: str | None = None
+    tags: list[str] | None = None
+    internal_reference: str | None = None
+    external_id: str | None = None
+    external_url: str | None = None
+    original_source: str | None = None
+    recurrence_id: str | None = None
+    recurrence_total: int | None = None
+    recurrence_count: int | None = None
+    bunq_payment_id: str | None = None
+    import_hash_v2: str | None = None
+    sepa_cc: str | None = None
+    sepa_ct_op: str | None = None
+    sepa_ct_id: str | None = None
+    sepa_db: str | None = None
+    sepa_country: str | None = None
+    sepa_ep: str | None = None
+    sepa_ci: str | None = None
+    sepa_batch_id: str | None = None
+    interest_date: str | None = None
+    book_date: str | None = None
+    process_date: str | None = None
+    due_date: str | None = None
+    payment_date: str | None = None
+    invoice_date: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    zoom_level: int | None = None
+    has_attachments: bool | None = None
+
+
+@dataclass
+class TransactionAttributes(DataClassORJSONMixin):
+    """Attributes of a Firefly transaction."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    user: str | None = None
+    group_title: str | None = None
+    transactions: list[Transaction] | None = None
+
+
+@dataclass
+class TransactionResource(DataClassORJSONMixin):
+    """Model for a Firefly transaction resource."""
+
+    type: str
+    id: str
+    attributes: TransactionAttributes
+    links: dict[str, Any] | None = None

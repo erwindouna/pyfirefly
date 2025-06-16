@@ -182,6 +182,55 @@ class Firefly:
 
         return [Account.from_dict(acc) for acc in accounts]
 
+    async def get_transactions(
+        self,
+        account_id: int | None = None,
+        start: str | None = None,
+        end: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Get transactions for a specific account. Else, return all transactions.
+
+        Args:
+        ----
+            account_id: The ID of the account to retrieve transactions for.
+            start: The start date for the transactions.
+            end: The end date for the transactions.
+
+        Returns:
+        -------
+            A list of transactions for the specified account.
+
+        """
+        transactions: list[dict[str, Any]] = []
+        next_page: int | None = 1
+
+        uri = f"accounts/{account_id}/transactions"
+        if account_id is None:
+            uri = "transactions"
+
+        while next_page:
+            params: dict[str, str] = {"page": str(next_page)}
+            if start:
+                params["start"] = start
+            if end:
+                params["end"] = end
+
+            response = await self._request(
+                uri=uri,
+                method="GET",
+                params=params,
+            )
+
+            transactions.extend(response["data"])
+
+            pagination = response.get("meta", {}).get("pagination", {})
+            current_page = int(pagination.get("current_page", 1) or 1)
+            total_pages = int(pagination.get("total_pages", 1) or 1)
+
+            next_page = current_page + 1 if current_page < total_pages else None
+
+        return transactions
+
     async def close(self) -> None:
         """Close open client session."""
         if self._session and self._close_session:
