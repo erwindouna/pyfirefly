@@ -33,4 +33,24 @@ async def test_about_model(
 
     about: About = await firefly_client.get_about()
     assert about == snapshot
-    await firefly_client.close()
+
+
+async def test_accounts_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Accounts model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/accounts",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("accounts.json"),
+        ),
+    )
+
+    accounts = await firefly_client.get_accounts()
+    assert accounts == snapshot

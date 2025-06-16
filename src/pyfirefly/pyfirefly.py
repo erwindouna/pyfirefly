@@ -20,7 +20,7 @@ from pyfirefly.exceptions import (
     FireflyNotFoundError,
     FireflyTimeoutError,
 )
-from pyfirefly.models import About
+from pyfirefly.models import About, Account
 
 try:
     VERSION = metadata.version(__package__)
@@ -132,7 +132,7 @@ class Firefly:
             raise FireflyConnectionError(msg) from err
 
         content_type = response.headers.get("Content-Type", "")
-        if "application/json" not in content_type:
+        if "application/json" not in content_type and "application/vnd.api+json" not in content_type:
             text = await response.text()
             msg = "Unexpected content type response from the Firefly API"
             raise FireflyError(
@@ -152,6 +152,35 @@ class Firefly:
         """
         about = await self._request("about")
         return About.from_dict(about["data"])
+
+    async def get_accounts(self) -> list[Account]:
+        """Get a list of accounts from the Firefly server.
+
+        Returns
+        -------
+            A list of Account objects containing account information.
+
+        """
+        accounts: list[dict[str, str]] = []
+        next_page: int | None = 1
+
+        while next_page:
+            response = await self._request(
+                uri="accounts",
+                method="GET",
+                params={"page": next_page},
+            )
+
+            accounts.extend(response["data"])
+
+            # Check for the next page in the pagination metadata
+            pagination = response.get("meta", {}).get("pagination", {})
+            current_page = int(pagination.get("current_page", 1) or 1)
+            total_pages = int(pagination.get("total_pages", 1) or 1)
+
+            next_page = current_page + 1 if current_page < total_pages else None
+
+        return [Account.from_dict(acc) for acc in accounts]
 
     async def close(self) -> None:
         """Close open client session."""
