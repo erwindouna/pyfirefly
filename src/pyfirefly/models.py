@@ -173,3 +173,39 @@ class TransactionResource(DataClassORJSONMixin):
     id: str
     attributes: TransactionAttributes
     links: dict[str, Any] | None = None
+
+
+@dataclass
+class CategoryAmount(DataClassORJSONMixin):
+    """Model for a category amount in Firefly."""
+
+    currency_id: str | None = None
+    currency_code: str | None = None
+    currency_symbol: str | None = None
+    currency_decimal_places: int | None = None
+    sum: str | None = None
+
+
+@dataclass
+class CategoryAttributes(DataClassORJSONMixin):
+    """Attributes of a Firefly category."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    name: str | None = None
+    notes: str | None = None
+    native_currency_id: str | None = None
+    native_currency_code: str | None = None
+    native_currency_symbol: str | None = None
+    native_currency_decimal_places: int | None = None
+    spent: list[CategoryAmount] | None = None
+    earned: list[CategoryAmount] | None = None
+
+
+@dataclass
+class Category(DataClassORJSONMixin):
+    """Model for a Firefly category."""
+
+    type: str
+    id: str
+    attributes: CategoryAttributes

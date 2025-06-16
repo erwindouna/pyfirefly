@@ -20,7 +20,7 @@ from pyfirefly.exceptions import (
     FireflyNotFoundError,
     FireflyTimeoutError,
 )
-from pyfirefly.models import About, Account
+from pyfirefly.models import About, Account, Category, Transaction
 
 try:
     VERSION = metadata.version(__package__)
@@ -187,7 +187,7 @@ class Firefly:
         account_id: int | None = None,
         start: str | None = None,
         end: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[Transaction]:
         """Get transactions for a specific account. Else, return all transactions.
 
         Args:
@@ -229,7 +229,28 @@ class Firefly:
 
             next_page = current_page + 1 if current_page < total_pages else None
 
-        return transactions
+        return [Transaction.from_dict(tx) for tx in transactions]
+
+    async def get_categories(self, category_id: int, start: str | None = None, end: str | None = None) -> Category:
+        """Get a specific category by its ID.
+
+        Args:
+            category_id: The ID of the category to retrieve.
+            start: The start date for the category, to show spent and earned info.
+            end: The end date for the category, to show spent and earned info.
+
+        Returns:
+            A Category object containing the category information.
+
+        """
+        params: dict[str, str] = {}
+        if start:
+            params["start"] = start
+        if end:
+            params["end"] = end
+
+        category = await self._request(uri=f"categories/{category_id}", params=params)
+        return Category.from_dict(category["data"])
 
     async def close(self) -> None:
         """Close open client session."""

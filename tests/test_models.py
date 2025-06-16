@@ -73,5 +73,56 @@ async def test_account_transactions_model(
         ),
     )
 
-    transactions = await firefly_client.get_transactions(account_id=1)
+    transactions = await firefly_client.get_transactions(account_id=1, start="2025-01-01", end="2025-12-31")
     assert transactions == snapshot
+
+    # Now for all transactions
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/transactions",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("account_transactions.json"),
+        ),
+    )
+
+    transactions = await firefly_client.get_transactions()
+    assert transactions == snapshot
+
+
+async def test_category_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Category model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/categories/1",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("category.json"),
+        ),
+    )
+
+    categories = await firefly_client.get_categories(category_id=1, start="2025-01-01", end="2025-12-31")
+    assert categories == snapshot
+
+    # Now without a date range
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/categories/1",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("category.json"),
+        ),
+    )
+
+    categories = await firefly_client.get_categories(category_id=1)
+    assert categories == snapshot
