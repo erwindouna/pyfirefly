@@ -209,3 +209,48 @@ class Category(DataClassORJSONMixin):
     type: str
     id: str
     attributes: CategoryAttributes
+
+
+@dataclass
+class BudgetSpent(DataClassORJSONMixin):
+    """Model for a Firefly budget spent."""
+
+    sum: str | None = None
+    currency_id: str | None = None
+    currency_code: str | None = None
+    currency_symbol: str | None = None
+    currency_decimal_places: int | None = None
+
+
+@dataclass
+class BudgetAttributes(DataClassORJSONMixin):
+    """Attributes of a Firefly budget."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    name: str | None = None
+    active: bool | None = None
+    notes: str | None = None
+    order: int | None = None
+    auto_budget_type: str | None = None
+    currency_id: str | None = None
+    currency_code: str | None = None
+    currency_symbol: str | None = None
+    currency_decimal_places: int | None = None
+    native_currency_id: str | None = None
+    native_currency_code: str | None = None
+    native_currency_symbol: str | None = None
+    native_currency_decimal_places: int | None = None
+    auto_budget_amount: str | None = None
+    native_auto_budget_amount: str | None = None
+    auto_budget_period: str | None = None
+    spent: list[BudgetSpent] | None = None
+
+
+@dataclass
+class Budget(DataClassORJSONMixin):
+    """Model for a Firefly budget."""
+
+    type: str
+    id: str
+    attributes: BudgetAttributes

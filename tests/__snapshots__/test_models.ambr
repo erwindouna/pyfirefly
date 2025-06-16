@@ -19,6 +19,16 @@
     Account(type='accounts', id='4', attributes=AccountAttributes(created_at='2021-05-10T09:30:00+01:00', updated_at='2022-05-10T09:30:00+01:00', active=True, name='Credit Card', type='liability', account_role='creditCard', currency_id='14', currency_code='GBP', currency_symbol='£', currency_decimal_places=2, native_currency_id='14', native_currency_code='GBP', native_currency_symbol='£', native_currency_decimal_places=2, current_balance='-250.00', native_current_balance='-250.00', current_balance_date='2022-05-10T09:30:00+01:00', order=3, notes='Credit card account', monthly_payment_date='2022-05-15T09:30:00+01:00', credit_card_type='monthlyFull', account_number='9876543210', iban='GB29NWBK60161331926819', bic='NWBKGB2L', virtual_balance='0.00', native_virtual_balance='0.00', opening_balance='0.00', native_opening_balance='0.00', opening_balance_date='2021-05-10T09:30:00+01:00', liability_type='credit', liability_direction='debit', interest='19.99', interest_period='monthly', current_debt='250.00', include_net_worth=False, longitude=0.1278, latitude=51.5074, zoom_level=10, last_activity=None)),
   ])
 # ---
+# name: test_budgets_model
+  list([
+    Budget(type='budgets', id='2', attributes=BudgetAttributes(created_at='2018-09-17T12:46:47+01:00', updated_at='2018-09-17T12:46:47+01:00', name='Bills', active=False, notes='Some notes', order=5, auto_budget_type='reset', currency_id='12', currency_code='EUR', currency_symbol='$', currency_decimal_places=2, native_currency_id='5', native_currency_code='EUR', native_currency_symbol='$', native_currency_decimal_places=2, auto_budget_amount='-1012.12', native_auto_budget_amount='-1012.12', auto_budget_period='monthly', spent=[BudgetSpent(sum='123.45', currency_id='5', currency_code='USD', currency_symbol='$', currency_decimal_places=2)])),
+  ])
+# ---
+# name: test_budgets_model.1
+  list([
+    Budget(type='budgets', id='2', attributes=BudgetAttributes(created_at='2018-09-17T12:46:47+01:00', updated_at='2018-09-17T12:46:47+01:00', name='Bills', active=False, notes='Some notes', order=5, auto_budget_type='reset', currency_id='12', currency_code='EUR', currency_symbol='$', currency_decimal_places=2, native_currency_id='5', native_currency_code='EUR', native_currency_symbol='$', native_currency_decimal_places=2, auto_budget_amount='-1012.12', native_auto_budget_amount='-1012.12', auto_budget_period='monthly', spent=[BudgetSpent(sum='123.45', currency_id='5', currency_code='USD', currency_symbol='$', currency_decimal_places=2)])),
+  ])
+# ---
 # name: test_category_model
   Category(type='categories', id='2', attributes=CategoryAttributes(created_at='2018-09-17T12:46:47+01:00', updated_at='2018-09-17T12:46:47+01:00', name='Lunch', notes='Some example notes', native_currency_id='5', native_currency_code='EUR', native_currency_symbol='$', native_currency_decimal_places=2, spent=[CategoryAmount(currency_id='5', currency_code='USD', currency_symbol='$', currency_decimal_places=2, sum='-12423.45')], earned=[CategoryAmount(currency_id='5', currency_code='USD', currency_symbol='$', currency_decimal_places=2, sum='123.45')]))
 # ---

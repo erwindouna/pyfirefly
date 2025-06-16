@@ -20,7 +20,7 @@ from pyfirefly.exceptions import (
     FireflyNotFoundError,
     FireflyTimeoutError,
 )
-from pyfirefly.models import About, Account, Category, Transaction
+from pyfirefly.models import About, Account, Budget, Category, Transaction
 
 try:
     VERSION = metadata.version(__package__)
@@ -251,6 +251,31 @@ class Firefly:
 
         category = await self._request(uri=f"categories/{category_id}", params=params)
         return Category.from_dict(category["data"])
+
+    async def get_budgets(self, start: str | None = None, end: str | None = None) -> list[Budget]:
+        """Get budgets for the Firefly server.
+
+        Args:
+            start: The start date for the budgets.
+            end: The end date for the budgets.
+
+        Returns:
+            A list of Budget objects containing budget information.
+
+        """
+        params: dict[str, str] = {}
+        if start:
+            params["start"] = start
+        if end:
+            params["end"] = end
+
+        budgets = await self._request(uri="budgets", params=params)
+        return [Budget.from_dict(budget) for budget in budgets["data"]]
+
+    @property
+    def api_url(self) -> str:
+        """Return the API URL."""
+        return f"{self._api_scheme}://{self._api_host}:{self._api_port}"
 
     async def close(self) -> None:
         """Close open client session."""

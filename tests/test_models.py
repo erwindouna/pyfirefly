@@ -126,3 +126,41 @@ async def test_category_model(
 
     categories = await firefly_client.get_categories(category_id=1)
     assert categories == snapshot
+
+
+async def test_budgets_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Budgets model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/budgets",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("budgets.json"),
+        ),
+    )
+
+    budgets = await firefly_client.get_budgets(start="2025-01-01", end="2025-12-31")
+    assert budgets == snapshot
+
+    # Now without a date range
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/budgets",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("budgets.json"),
+        ),
+    )
+
+    budgets = await firefly_client.get_budgets()
+    assert budgets == snapshot
+
+    # Now for all budgets
