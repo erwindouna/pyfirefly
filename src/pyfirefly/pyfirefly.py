@@ -231,7 +231,35 @@ class Firefly:
 
         return [Transaction.from_dict(tx) for tx in transactions]
 
-    async def get_categories(self, category_id: int, start: str | None = None, end: str | None = None) -> Category:
+    async def get_categories(self) -> list[Category]:
+        """Get all categories from the Firefly server.
+
+        Returns
+        -------
+            A list of Category objects containing category information.
+
+        """
+        categories: list[dict[str, Any]] = []
+        next_page: int | None = 1
+
+        while next_page:
+            response = await self._request(
+                uri="categories",
+                method="GET",
+                params={"page": next_page},
+            )
+
+            categories.extend(response["data"])
+
+            pagination = response.get("meta", {}).get("pagination", {})
+            current_page = int(pagination.get("current_page", 1) or 1)
+            total_pages = int(pagination.get("total_pages", 1) or 1)
+
+            next_page = current_page + 1 if current_page < total_pages else None
+
+        return [Category.from_dict(cat) for cat in categories]
+
+    async def get_category(self, category_id: int, start: str | None = None, end: str | None = None) -> Category:
         """Get a specific category by its ID.
 
         Args:

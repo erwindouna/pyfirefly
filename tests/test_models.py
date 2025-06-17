@@ -109,8 +109,8 @@ async def test_category_model(
         ),
     )
 
-    categories = await firefly_client.get_categories(category_id=1, start="2025-01-01", end="2025-12-31")
-    assert categories == snapshot
+    category = await firefly_client.get_category(category_id=1, start="2025-01-01", end="2025-12-31")
+    assert category == snapshot
 
     # Now without a date range
     aresponses.add(
@@ -124,7 +124,28 @@ async def test_category_model(
         ),
     )
 
-    categories = await firefly_client.get_categories(category_id=1)
+    category = await firefly_client.get_category(category_id=1)
+    assert category == snapshot
+
+
+async def test_categories_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Categories model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/categories",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("categories.json"),
+        ),
+    )
+
+    categories = await firefly_client.get_categories()
     assert categories == snapshot
 
 
