@@ -327,3 +327,27 @@ class PreferencesAttributes(DataClassORJSONMixin):
     user_group_id: int | None = None
     name: str | None = None
     data: str | bool | None = None
+
+
+@dataclass
+class Currency(DataClassORJSONMixin):
+    """Model for a Firefly currency."""
+
+    type: str
+    id: str
+    attributes: CurrencyAttributes
+
+
+@dataclass
+class CurrencyAttributes(DataClassORJSONMixin):
+    """Attributes of a Firefly currency."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    enabled: bool | None = None
+    default: bool | None = None
+    native: bool | None = None
+    code: str | None = None
+    name: str | None = None
+    symbol: str | None = None
+    decimal_places: int | None = None

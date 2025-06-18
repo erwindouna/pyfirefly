@@ -50,6 +50,14 @@
 # name: test_category_model.1
   Category(type='categories', id='2', attributes=CategoryAttributes(created_at='2018-09-17T12:46:47+01:00', updated_at='2018-09-17T12:46:47+01:00', name='Lunch', notes='Some example notes', native_currency_id='5', native_currency_code='EUR', native_currency_symbol='$', native_currency_decimal_places=2, spent=[CategoryAmount(currency_id='5', currency_code='USD', currency_symbol='$', currency_decimal_places=2, sum='-12423.45')], earned=[CategoryAmount(currency_id='5', currency_code='USD', currency_symbol='$', currency_decimal_places=2, sum='123.45')]))
 # ---
+# name: test_currencies_model
+  list([
+    Currency(type='currencies', id='2', attributes=CurrencyAttributes(created_at='2018-09-17T12:46:47+01:00', updated_at='2018-09-17T12:46:47+01:00', enabled=True, default=False, native=False, code='AMS', name='Ankh-Morpork dollar', symbol='AM$', decimal_places=2)),
+  ])
+# ---
+# name: test_currency_native_model
+  Currency(type='currencies', id='2', attributes=CurrencyAttributes(created_at='2018-09-17T12:46:47+01:00', updated_at='2018-09-17T12:46:47+01:00', enabled=True, default=False, native=False, code='AMS', name='Ankh-Morpork dollar', symbol='AM$', decimal_places=2))
+# ---
 # name: test_preferences_model
   list([
     Preferences(type='preferences', id=2),

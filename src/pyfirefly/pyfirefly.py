@@ -26,6 +26,7 @@ from pyfirefly.models import (
     Bill,
     Budget,
     Category,
+    Currency,
     Preferences,
     Transaction,
 )
@@ -347,6 +348,28 @@ class Firefly:
         """
         preferences = await self._request("preferences")
         return [Preferences.from_dict(pref) for pref in preferences["data"]]
+
+    async def get_currencies(self) -> list[Currency]:
+        """Get currencies from the Firefly server.
+
+        Returns
+        -------
+            A list of Currency objects containing the currencies.
+
+        """
+        currencies = await self._request("currencies")
+        return [Currency.from_dict(cur) for cur in currencies["data"]]
+
+    async def get_currency_native(self) -> Currency:
+        """Get the native currency of the current administration.
+
+        Returns
+        -------
+            A Currency object containing the native currency symbol.
+
+        """
+        currency = await self._request("currencies/native")
+        return Currency.from_dict(currency["data"])
 
     async def close(self) -> None:
         """Close open client session."""

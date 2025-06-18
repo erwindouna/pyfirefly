@@ -240,3 +240,45 @@ async def test_preferences_model(
 
     preferences = await firefly_client.get_preferences()
     assert preferences == snapshot
+
+
+async def test_currencies_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Currencies model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/currencies",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("currencies.json"),
+        ),
+    )
+
+    currencies = await firefly_client.get_currencies()
+    assert currencies == snapshot
+
+
+async def test_currency_native_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Currency Native model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/currencies/native",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("currency_native.json"),
+        ),
+    )
+
+    currency_native = await firefly_client.get_currency_native()
+    assert currency_native == snapshot
