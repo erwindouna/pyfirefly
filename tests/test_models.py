@@ -219,3 +219,24 @@ async def test_bills_model(
 
     bills = await firefly_client.get_bills()
     assert bills == snapshot
+
+
+async def test_preferences_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Preferences model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/preferences",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("preferences.json"),
+        ),
+    )
+
+    preferences = await firefly_client.get_preferences()
+    assert preferences == snapshot

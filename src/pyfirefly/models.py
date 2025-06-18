@@ -308,3 +308,22 @@ class Bill(DataClassORJSONMixin):
     type: str
     id: str
     attributes: BillAttributes
+
+
+@dataclass
+class Preferences(DataClassORJSONMixin):
+    """Model for Firefly preferences."""
+
+    type: str
+    id: int
+
+
+@dataclass
+class PreferencesAttributes(DataClassORJSONMixin):
+    """Attributes of Firefly preferences."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    user_group_id: int | None = None
+    name: str | None = None
+    data: str | bool | None = None

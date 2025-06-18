@@ -20,7 +20,15 @@ from pyfirefly.exceptions import (
     FireflyNotFoundError,
     FireflyTimeoutError,
 )
-from pyfirefly.models import About, Account, Bill, Budget, Category, Transaction
+from pyfirefly.models import (
+    About,
+    Account,
+    Bill,
+    Budget,
+    Category,
+    Preferences,
+    Transaction,
+)
 
 try:
     VERSION = metadata.version(__package__)
@@ -328,6 +336,17 @@ class Firefly:
             next_page = current_page + 1 if current_page < total_pages else None
 
         return [Bill.from_dict(bill) for bill in bills]
+
+    async def get_preferences(self) -> list[Preferences]:
+        """Get preferences from the Firefly server.
+
+        Returns
+        -------
+            A list of Preferences objects containing the preferences.
+
+        """
+        preferences = await self._request("preferences")
+        return [Preferences.from_dict(pref) for pref in preferences["data"]]
 
     async def close(self) -> None:
         """Close open client session."""
