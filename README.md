@@ -15,12 +15,12 @@
 [![Code Coverage][codecov-shield]][codecov-url]
 
 
-Asynchronous Python client for Python Firefly.
+Asynchronous Python client for Python Firefly III.
 
 ## About
 
-This is an asynchronous Python client for the [Firefly API](https://docs.firefly.io/api-docs/). It is designed to be used with the [Firefly](https://www.firefly.io/) container management tool.
-This package is a wrapper around the Firefly API, which allows you to interact with Firefly programmatically.
+This is an asynchronous Python client for the [Firefly III API](https://docs.firefly.io/api-docs/). It is designed to be used with the [Firefly III](https://www.firefly.io/) container management tool.
+This package is a wrapper around the Firefly III API, which allows you to interact with Firefly III programmatically.
 
 In it's current stage it's still in development and not all endpoints are implemented yet.
 

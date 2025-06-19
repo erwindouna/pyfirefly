@@ -248,7 +248,7 @@ class Firefly:
             A list of Category objects containing category information.
 
         """
-        categories: list[dict[str, Any]] = []
+        categories: list[dict[str, str]] = []
         next_page: int | None = 1
 
         while next_page:
