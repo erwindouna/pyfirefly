@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from aresponses import ResponsesMockServer
@@ -73,7 +74,11 @@ async def test_account_transactions_model(
         ),
     )
 
-    transactions = await firefly_client.get_transactions(account_id=1, start="2025-01-01", end="2025-12-31")
+    transactions = await firefly_client.get_transactions(
+        account_id=1,
+        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
+        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+    )
     assert transactions == snapshot
 
     # Now for all transactions
@@ -109,7 +114,11 @@ async def test_category_model(
         ),
     )
 
-    category = await firefly_client.get_category(category_id=1, start="2025-01-01", end="2025-12-31")
+    category = await firefly_client.get_category(
+        category_id=1,
+        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
+        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+    )
     assert category == snapshot
 
     # Now without a date range
@@ -166,7 +175,10 @@ async def test_budgets_model(
         ),
     )
 
-    budgets = await firefly_client.get_budgets(start="2025-01-01", end="2025-12-31")
+    budgets = await firefly_client.get_budgets(
+        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
+        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+    )
     assert budgets == snapshot
 
     # Now without a date range
@@ -202,7 +214,10 @@ async def test_bills_model(
         ),
     )
 
-    bills = await firefly_client.get_bills(start="2025-01-01", end="2025-12-31")
+    bills = await firefly_client.get_bills(
+        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
+        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+    )
     assert bills == snapshot
 
     # Now without a date range

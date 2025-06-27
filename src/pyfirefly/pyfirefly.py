@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from datetime import date
+from datetime import datetime
 from importlib import metadata
 from typing import Any, Self
 from urllib.parse import urlparse
@@ -152,7 +152,7 @@ class Firefly:
 
         return await response.json()
 
-    def _format_date(self, date_value: date | str) -> str:
+    def _format_date(self, date_value: datetime | str) -> str:
         """Format a date value to a string in 'YYYY-MM-DD' format.
 
         Args:
@@ -162,7 +162,7 @@ class Firefly:
             A string formatted as 'YYYY-MM-DD'.
 
         """
-        if isinstance(date_value, date):
+        if isinstance(date_value, datetime):
             return date_value.strftime("%Y-%m-%d")
         return date_value
 
@@ -209,8 +209,8 @@ class Firefly:
     async def get_transactions(
         self,
         account_id: int | None = None,
-        start: date | None = None,
-        end: date | None = None,
+        start: datetime | None = None,
+        end: datetime | None = None,
     ) -> list[Transaction]:
         """Get transactions for a specific account. Else, return all transactions.
 
@@ -283,7 +283,12 @@ class Firefly:
 
         return [Category.from_dict(cat) for cat in categories]
 
-    async def get_category(self, category_id: int, start: date | None = None, end: date | None = None) -> Category:
+    async def get_category(
+        self,
+        category_id: int,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> Category:
         """Get a specific category by its ID.
 
         Args:
@@ -304,7 +309,7 @@ class Firefly:
         category = await self._request(uri=f"categories/{category_id}", params=params)
         return Category.from_dict(category["data"])
 
-    async def get_budgets(self, start: date | None = None, end: date | None = None) -> list[Budget]:
+    async def get_budgets(self, start: datetime | None = None, end: datetime | None = None) -> list[Budget]:
         """Get budgets for the Firefly server. Both start and end dates are required for date range filtering.
 
         Args:
@@ -323,7 +328,7 @@ class Firefly:
         budgets = await self._request(uri="budgets", params=params)
         return [Budget.from_dict(budget) for budget in budgets["data"]]
 
-    async def get_bills(self, start: date | None = None, end: date | None = None) -> list[Bill]:
+    async def get_bills(self, start: datetime | None = None, end: datetime | None = None) -> list[Bill]:
         """Get bills for the Firefly server. Both start and end dates are required for date range filtering.
 
         Args:
