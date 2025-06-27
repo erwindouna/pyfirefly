@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
+from datetime import datetime
 from importlib import metadata
 from typing import Any, Self
 from urllib.parse import urlparse
@@ -151,6 +152,20 @@ class Firefly:
 
         return await response.json()
 
+    def _format_date(self, date_value: datetime | str) -> str:
+        """Format a date value to a string in 'YYYY-MM-DD' format.
+
+        Args:
+            date_value: A date object or a string representing a date.
+
+        Returns:
+            A string formatted as 'YYYY-MM-DD'.
+
+        """
+        if isinstance(date_value, datetime):
+            return date_value.strftime("%Y-%m-%d")
+        return date_value
+
     async def get_about(self) -> About:
         """Get information about the Firefly server.
 
@@ -194,8 +209,8 @@ class Firefly:
     async def get_transactions(
         self,
         account_id: int | None = None,
-        start: str | None = None,
-        end: str | None = None,
+        start: datetime | None = None,
+        end: datetime | None = None,
     ) -> list[Transaction]:
         """Get transactions for a specific account. Else, return all transactions.
 
@@ -220,9 +235,9 @@ class Firefly:
         while next_page:
             params: dict[str, str] = {"page": str(next_page)}
             if start:
-                params["start"] = start
+                params["start"] = self._format_date(start)
             if end:
-                params["end"] = end
+                params["end"] = self._format_date(end)
 
             response = await self._request(
                 uri=uri,
@@ -268,7 +283,12 @@ class Firefly:
 
         return [Category.from_dict(cat) for cat in categories]
 
-    async def get_category(self, category_id: int, start: str | None = None, end: str | None = None) -> Category:
+    async def get_category(
+        self,
+        category_id: int,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> Category:
         """Get a specific category by its ID.
 
         Args:
@@ -282,14 +302,14 @@ class Firefly:
         """
         params: dict[str, str] = {}
         if start:
-            params["start"] = start
+            params["start"] = self._format_date(start)
         if end:
-            params["end"] = end
+            params["end"] = self._format_date(end)
 
         category = await self._request(uri=f"categories/{category_id}", params=params)
         return Category.from_dict(category["data"])
 
-    async def get_budgets(self, start: str | None = None, end: str | None = None) -> list[Budget]:
+    async def get_budgets(self, start: datetime | None = None, end: datetime | None = None) -> list[Budget]:
         """Get budgets for the Firefly server. Both start and end dates are required for date range filtering.
 
         Args:
@@ -302,13 +322,13 @@ class Firefly:
         """
         params: dict[str, str] = {}
         if start and end:
-            params["start"] = start
-            params["end"] = end
+            params["start"] = self._format_date(start)
+            params["end"] = self._format_date(end)
 
         budgets = await self._request(uri="budgets", params=params)
         return [Budget.from_dict(budget) for budget in budgets["data"]]
 
-    async def get_bills(self, start: str | None = None, end: str | None = None) -> list[Bill]:
+    async def get_bills(self, start: datetime | None = None, end: datetime | None = None) -> list[Bill]:
         """Get bills for the Firefly server. Both start and end dates are required for date range filtering.
 
         Args:
@@ -323,8 +343,8 @@ class Firefly:
         next_page: int | None = 1
         params: dict[str, str] = {"page": str(next_page)}
         if start and end:
-            params["start"] = start
-            params["end"] = end
+            params["start"] = self._format_date(start)
+            params["end"] = self._format_date(end)
 
         while next_page:
             response = await self._request(uri="bills", params=params)
