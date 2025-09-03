@@ -380,15 +380,15 @@ class Firefly:
         currencies = await self._request("currencies")
         return [Currency.from_dict(cur) for cur in currencies["data"]]
 
-    async def get_currency_native(self) -> Currency:
-        """Get the native currency of the current administration.
+    async def get_currency_primary(self) -> Currency:
+        """Get the primary currency of the current administration.
 
         Returns
         -------
-            A Currency object containing the native currency symbol.
+            A Currency object containing the primary currency symbol.
 
         """
-        currency = await self._request("currencies/native")
+        currency = await self._request("currencies/primary")
         return Currency.from_dict(currency["data"])
 
     async def close(self) -> None:
