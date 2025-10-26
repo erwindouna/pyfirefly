@@ -1,0 +1,57 @@
+{
+  "data": [
+    {
+      "type": "budget_limits",
+      "id": "2",
+      "attributes": {
+        "created_at": "2025-10-01T00:00:00+00:00",
+        "updated_at": "2025-10-01T00:00:00+00:00",
+        "start": "2025-10-01T00:00:00+00:00",
+        "end": "2025-10-31T23:59:59+00:00",
+        "budget_id": "23",
+        "object_has_currency_setting": true,
+        "currency_id": "5",
+        "currency_name": "Euro",
+        "currency_code": "EUR",
+        "currency_symbol": "$",
+        "currency_decimal_places": 2,
+        "primary_currency_id": "5",
+        "primary_currency_name": "Euro",
+        "primary_currency_code": "EUR",
+        "primary_currency_symbol": "$",
+        "primary_currency_decimal_places": 2,
+        "amount": "123.45",
+        "pc_amount": "123.45",
+        "period": "monthly",
+        "spent": [
+          {
+            "currency_id": "5",
+            "currency_code": "USD",
+            "currency_symbol": "$",
+            "currency_decimal_places": 2,
+            "sum": "123.45"
+          }
+        ],
+        "pc_spent": [
+          {
+            "currency_id": "5",
+            "currency_code": "USD",
+            "currency_symbol": "$",
+            "currency_decimal_places": 2,
+            "sum": "123.45"
+          }
+        ],
+        "notes": "Some example notes"
+      }
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "total": 3,
+      "count": 20,
+      "per_page": 100,
+      "current_page": 1,
+      "total_pages": 1
+    }
+  }
+}
