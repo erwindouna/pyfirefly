@@ -26,6 +26,7 @@ from pyfirefly.models import (
     Account,
     Bill,
     Budget,
+    BudgetLimitAttributes,
     Category,
     Currency,
     Preferences,
@@ -327,6 +328,26 @@ class Firefly:
 
         budgets = await self._request(uri="budgets", params=params)
         return [Budget.from_dict(budget) for budget in budgets["data"]]
+
+    async def get_budget_limits(self, budget_id: int, start: datetime | None = None, end: datetime | None = None) -> list[BudgetLimitAttributes]:
+        """Get budget limits for the Firefly server. Both start and end dates are required for date range filtering.
+
+        Args:
+            budget_id: The ID of the budget to retrieve limits for.
+            start: The start date for the budget limits.
+            end: The end date for the budget limits.
+
+        Returns:
+            A list of BudgetLimitAttributes objects containing budget limit information.
+
+        """
+        params: dict[str, str] = {}
+        if start and end:
+            params["start"] = self._format_date(start)
+            params["end"] = self._format_date(end)
+
+        budget_limits = await self._request(uri=f"budgets/{budget_id}/limits", params=params)
+        return [BudgetLimitAttributes.from_dict(limit) for limit in budget_limits["data"]]
 
     async def get_bills(self, start: datetime | None = None, end: datetime | None = None) -> list[Bill]:
         """Get bills for the Firefly server. Both start and end dates are required for date range filtering.

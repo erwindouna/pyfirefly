@@ -257,6 +257,38 @@ class Budget(DataClassORJSONMixin):
 
 
 @dataclass
+class BudgetLimitAttributes(DataClassORJSONMixin):  # pylint: disable=too-many-instance-attributes
+    """Attributes of a Firefly budget limit."""
+
+    created_at: str | None = None
+    updated_at: str | None = None
+    budget_id: str | None = None
+    budget_name: str | None = None
+    start: str | None = None
+    end: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    amount: str | None = None
+    pc_amount: str | None = None
+    native_amount: str | None = None
+    object_has_currency_setting: bool | None = None
+    currency_id: str | None = None
+    currency_name: str | None = None
+    currency_code: str | None = None
+    currency_symbol: str | None = None
+    currency_decimal_places: int | None = None
+    primary_currency_id: str | None = None
+    primary_currency_name: str | None = None
+    primary_currency_code: str | None = None
+    primary_currency_symbol: str | None = None
+    primary_currency_decimal_places: int | None = None
+    period: str | None = None
+    spent: list[BudgetSpent] | None = None
+    pc_spent: list[BudgetSpent] | None = None
+    notes: str | None = None
+
+
+@dataclass
 class BillPaidDate(DataClassORJSONMixin):
     """Model for a Firefly bill paid date."""
 

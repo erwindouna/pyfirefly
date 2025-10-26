@@ -197,6 +197,46 @@ async def test_budgets_model(
     assert budgets == snapshot
 
 
+async def test_budget_limits_model(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test the Budget Limits model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/budgets/2/limits",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("budget_limits.json"),
+        ),
+    )
+
+    budget_limits = await firefly_client.get_budget_limits(
+        budget_id=2,
+        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
+        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+    )
+    assert budget_limits == snapshot
+
+    # Now without a date range
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/budgets/2/limits",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("budget_limits.json"),
+        ),
+    )
+
+    budget_limits = await firefly_client.get_budget_limits(budget_id=2)
+    assert budget_limits == snapshot
+
+
 async def test_bills_model(
     aresponses: ResponsesMockServer,
     firefly_client: Firefly,

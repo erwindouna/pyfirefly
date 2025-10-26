@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyfirefly"
-version = "0.1.5"
+version = "0.1.8"
 description = "Asynchronous Python client for the Firefly III API"
 authors = ["Erwin Douna <e.douna@gmail.com>"]
 maintainers = ["Erwin Douna <e.douna@gmail.com>"]
