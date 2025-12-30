@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from aresponses import ResponsesMockServer
@@ -76,8 +76,8 @@ async def test_account_transactions_model(
 
     transactions = await firefly_client.get_transactions(
         account_id=1,
-        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
-        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+        start=datetime(2025, 1, 1, tzinfo=UTC),
+        end=datetime(2025, 12, 31, tzinfo=UTC),
     )
     assert transactions == snapshot
 
@@ -116,8 +116,8 @@ async def test_category_model(
 
     category = await firefly_client.get_category(
         category_id=1,
-        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
-        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+        start=datetime(2025, 1, 1, tzinfo=UTC),
+        end=datetime(2025, 12, 31, tzinfo=UTC),
     )
     assert category == snapshot
 
@@ -176,8 +176,8 @@ async def test_budgets_model(
     )
 
     budgets = await firefly_client.get_budgets(
-        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
-        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+        start=datetime(2025, 1, 1, tzinfo=UTC),
+        end=datetime(2025, 12, 31, tzinfo=UTC),
     )
     assert budgets == snapshot
 
@@ -216,8 +216,8 @@ async def test_budget_limits_model(
 
     budget_limits = await firefly_client.get_budget_limits(
         budget_id=2,
-        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
-        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+        start=datetime(2025, 1, 1, tzinfo=UTC),
+        end=datetime(2025, 12, 31, tzinfo=UTC),
     )
     assert budget_limits == snapshot
 
@@ -255,8 +255,8 @@ async def test_bills_model(
     )
 
     bills = await firefly_client.get_bills(
-        start=datetime(2025, 1, 1, tzinfo=timezone.utc),
-        end=datetime(2025, 12, 31, tzinfo=timezone.utc),
+        start=datetime(2025, 1, 1, tzinfo=UTC),
+        end=datetime(2025, 12, 31, tzinfo=UTC),
     )
     assert bills == snapshot
 
