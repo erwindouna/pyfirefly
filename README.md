@@ -1,4 +1,5 @@
 <!-- PROJECT SHIELDS -->
+
 [![GitHub Release][releases-shield]][releases]
 [![Python Versions][python-versions-shield]][pypi]
 ![Project Stage][project-stage-shield]
@@ -13,7 +14,6 @@
 [![Build Status][build-shield]][build-url]
 [![Typing Status][typing-shield]][typing-url]
 [![Code Coverage][codecov-shield]][codecov-url]
-
 
 Asynchronous Python client for Python Firefly III.
 
@@ -72,24 +72,23 @@ By clicking the button below you immediately start a Dev Container in Visual Stu
 
 [![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
-This Python project relies on [Poetry][poetry] as its dependency manager,
-providing comprehensive management and control over project dependencies.
+This Python project uses [uv][uv] for dependency management and task running,
+providing fast, reliable installs and simple command execution.
 
 You need at least:
 
 - Python 3.11+
-- [Poetry][poetry-install]
+- [uv][uv-install]
 
 ### Installation
 
 Install all packages, including all development requirements:
 
 ```bash
-poetry install
+uv sync --all-groups
 ```
 
-_Poetry creates by default an virtual environment where it installs all
-necessary pip packages_.
+uv will create and manage a virtual environment and install all dependencies.
 
 ### Pre-commit
 
@@ -97,13 +96,13 @@ This repository uses the [pre-commit][pre-commit] framework, all changes
 are linted and tested with each commit. To setup the pre-commit check, run:
 
 ```bash
-poetry run pre-commit install
+uv run pre-commit install
 ```
 
 And to run all checks and tests manually, use the following command:
 
 ```bash
-poetry run pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 ### Testing
@@ -111,13 +110,13 @@ poetry run pre-commit run --all-files
 It uses [pytest](https://docs.pytest.org/en/stable/) as the test framework. To run the tests:
 
 ```bash
-poetry run pytest
+uv run pytest
 ```
 
 To update the [syrupy](https://github.com/tophat/syrupy) snapshot tests:
 
 ```bash
-poetry run pytest --snapshot-update
+uv run pytest --snapshot-update
 ```
 
 ## License
@@ -144,11 +143,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
 <!-- LINKS FROM PLATFORM -->
 
-
 <!-- MARKDOWN LINKS & IMAGES -->
+
 [build-shield]: https://github.com/erwindouna/pyfirefly/actions/workflows/tests.yaml/badge.svg
 [build-url]: https://github.com/erwindouna/pyfirefly/actions/workflows/tests.yaml
 [codecov-shield]: https://codecov.io/gh/erwindouna/pyfirefly/branch/main/graph/badge.svg?token=TOKEN
@@ -171,7 +169,6 @@ SOFTWARE.
 [releases]: https://github.com/erwindouna/pyfirefly/releases
 [typing-shield]: https://github.com/erwindouna/pyfirefly/actions/workflows/typing.yaml/badge.svg
 [typing-url]: https://github.com/erwindouna/pyfirefly/actions/workflows/typing.yaml
-
-[poetry-install]: https://python-poetry.org/docs/#installation
-[poetry]: https://python-poetry.org
+[uv-install]: https://docs.astral.sh/uv/installation/
+[uv]: https://docs.astral.sh/uv/
 [pre-commit]: https://pre-commit.com
