@@ -161,7 +161,7 @@ SOFTWARE.
 [license-shield]: https://img.shields.io/github/license/erwindouna/pyfirefly.svg
 [maintainability-shield]: https://api.codeclimate.com/v1/badges/TOKEN/maintainability
 [maintainability-url]: https://codeclimate.com/github/erwindouna/pyfirefly/maintainability
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2026.svg
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
 [pypi]: https://pypi.org/project/pyfirefly/
 [python-versions-shield]: https://img.shields.io/pypi/pyversions/pyfirefly
