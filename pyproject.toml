@@ -148,6 +148,7 @@ lint.ignore = [
   "D417",    # False positives in some occasions
   "PLR2004", # Just annoying, not really useful
   "SLOT000", # Has a bug with enums: https://github.com/astral-sh/ruff/issues/5748
+  "CPY001",  # No copyright header convention in this project
 
   # Conflicts with the Ruff formatter
   "COM812",
