@@ -362,12 +362,13 @@ class Firefly:
         """
         bills: list[dict[str, Any]] = []
         next_page: int | None = 1
-        params: dict[str, str] = {"page": str(next_page)}
-        if start and end:
-            params["start"] = self._format_date(start)
-            params["end"] = self._format_date(end)
 
         while next_page:
+            params: dict[str, str] = {"page": str(next_page)}
+            if start and end:
+                params["start"] = self._format_date(start)
+                params["end"] = self._format_date(end)
+
             response = await self._request(uri="bills", params=params)
             bills.extend(response["data"])
 
