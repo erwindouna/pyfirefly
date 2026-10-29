@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from aiohttp.web import Request, Response
 from aresponses import ResponsesMockServer
 from syrupy.assertion import SnapshotAssertion
 
@@ -274,6 +276,35 @@ async def test_bills_model(
 
     bills = await firefly_client.get_bills()
     assert bills == snapshot
+
+
+async def test_bills_pagination(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+) -> None:
+    """Test bills are fetched from every page."""
+    bill = json.loads(load_fixtures("bills.json"))["data"][0]
+    requested_pages: list[str] = []
+
+    async def handler(request: Request) -> Response:
+        page = request.query["page"]
+        requested_pages.append(page)
+        body = {
+            "data": [{**bill, "id": page}],
+            "meta": {"pagination": {"current_page": int(page), "total_pages": 2}},
+        }
+        return Response(
+            status=200,
+            content_type="application/json",
+            text=json.dumps(body),
+        )
+
+    aresponses.add("localhost:9000", "/api/v1/bills", "GET", handler, repeat=2)
+
+    bills = await firefly_client.get_bills()
+
+    assert requested_pages == ["1", "2"]
+    assert [bill.id for bill in bills] == ["1", "2"]
 
 
 async def test_preferences_model(
