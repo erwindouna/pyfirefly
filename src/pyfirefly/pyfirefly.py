@@ -24,6 +24,7 @@ from pyfirefly.exceptions import (
 from pyfirefly.models import (
     About,
     Account,
+    AccountAttributes,
     Bill,
     Budget,
     BudgetLimitAttributes,
@@ -153,6 +154,92 @@ class Firefly:
 
         return await response.json()
 
+    async def _delete(self, uri: str) -> None:
+        url = URL.build(
+            scheme=self._api_scheme,
+            host=self._api_host,
+            port=self._api_port,
+            path="/api/v1/",
+        ).join(URL(uri))
+
+        headers = {
+            "Accept": "application/json, text/plain",
+            "User-Agent": f"PythonFirefly/{VERSION}",
+            "Authorization": f"Bearer {self._api_key}",
+        }
+
+        if self._session is None:
+            self._session = ClientSession()
+            self._close_session = True
+
+        try:
+            async with asyncio.timeout(self._request_timeout):
+                response = await self._session.delete(
+                    url,
+                    headers=headers,
+                )
+                response.raise_for_status()
+        except TimeoutError as err:
+            msg = f"Timeout error while POSTing {url}: {err}"
+            raise FireflyTimeoutError(msg) from err
+        except ClientResponseError as err:
+            if err.status == 401:
+                msg = f"Authentication failed for POST {url}: Invalid API key"
+                raise FireflyAuthenticationError(msg) from err
+            if err.status == 404:
+                msg = f"Resource not found at POSTing {url}: {err}"
+                raise FireflyNotFoundError(msg) from err
+            raise FireflyConnectionError(msg) from err
+        except (ClientError, socket.gaierror) as err:
+            msg = f"Unexpected error during POST to {url}: {err}"
+            raise FireflyConnectionError(msg) from err
+
+    async def _post(self, uri: str, data: Any) -> Any:
+        url = URL.build(
+            scheme=self._api_scheme,
+            host=self._api_host,
+            port=self._api_port,
+            path="/api/v1/",
+        ).join(URL(uri))
+
+        headers = {
+            "Accept": "application/json, text/plain",
+            "User-Agent": f"PythonFirefly/{VERSION}",
+            "Authorization": f"Bearer {self._api_key}",
+        }
+
+        if self._session is None:
+            self._session = ClientSession()
+            self._close_session = True
+
+        try:
+            async with asyncio.timeout(self._request_timeout):
+                response = await self._session.post(url, headers=headers, json=data)
+                # If we get a 422 error we need the data from the response for that error handling.
+                # Hence we get that information now, prior to raise_for_status()
+                json_response = await response.json()
+                response.raise_for_status()
+        except TimeoutError as err:
+            msg = f"Timeout error while POSTing {url}: {err}"
+            raise FireflyTimeoutError(msg) from err
+        except ClientResponseError as err:
+            if err.status == 401:
+                msg = f"Authentication failed for POST {url}: Invalid API key"
+                raise FireflyAuthenticationError(msg) from err
+            if err.status == 404:
+                msg = f"Resource not found at POSTing {url}: {err}"
+                raise FireflyNotFoundError(msg) from err
+            if err.status == 422:
+                msg = f"Validation error for POST to {url}. "
+                msg += " ".join([i[0] for i in json_response["errors"].values()])
+                raise FireflyError(msg) from err
+            raise FireflyConnectionError(msg) from err
+        except (ClientError, socket.gaierror) as err:
+            msg = f"Unexpected error during POST to {url}: {err}"
+            raise FireflyConnectionError(msg) from err
+
+        return json_response
+
     def _format_date(self, date_value: datetime | str) -> str:
         """Format a date value to a string in 'YYYY-MM-DD' format.
 
@@ -206,6 +293,120 @@ class Firefly:
             next_page = current_page + 1 if current_page < total_pages else None
 
         return [Account.from_dict(acc) for acc in accounts]
+
+    async def delete_account(self, account: Account) -> None:
+        """Delete a account.
+
+        Args:
+        ----
+            account: Account object to delete.
+
+        """
+        uri = f"accounts/{account.id}"
+
+        await self._delete(
+            uri=uri,
+        )
+
+    async def create_account(self, account: Account) -> Account:
+        """Create a account.
+
+        Args:
+        ----
+            account: Account object to create. id attribute is ignored.
+
+        Returns:
+        -------
+            A new account object, with the id attribute set.
+
+        """
+        uri = "accounts"
+
+        # translate account object into a data structure that is acceptable to
+        # aiohttp post() method. THe documentation says this is can be a FormData
+        # object or anything that can be passed into FormData, e.g. a dictionary,
+        # bytes, or file-like object.
+        # But also the fireflyiii /v1/accounts POST API endpoint is expecting a json
+        # array with the necessary account information or key=value pairs, and
+        # gives an example.
+
+        response = await self._post(
+            uri=uri,
+            data={
+                "type": account.type,
+                "name": account.attributes.name,
+                "currency_id": account.attributes.currency_id,
+                "currency_code": account.attributes.currency_code,
+                "include_net_worth": True,
+                "notes": account.attributes.notes,
+                "account_role": account.attributes.account_role,
+                "liability_type": account.attributes.liability_type,
+                "liability_direction": account.attributes.liability_direction,
+                "iban": account.attributes.iban,
+                "bic": account.attributes.bic,
+                "account_number": account.attributes.account_number,
+                "opening_balance": account.attributes.opening_balance,
+                "opening_balance_date": account.attributes.opening_balance_date,
+                "virtual_balance": account.attributes.virtual_balance,
+                "active": account.attributes.active,
+                "order": account.attributes.order,
+                "credit_card_type": account.attributes.credit_card_type,
+                "monthly_payment_date": account.attributes.monthly_payment_date,
+                "interest": float(account.attributes.interest) if account.attributes.interest is not None else 0.0,
+                "interest_period": account.attributes.interest_period,
+                "latitude": account.attributes.latitude,
+                "longitude": account.attributes.longitude,
+                "zoom_level": account.attributes.zoom_level,
+            },
+        )
+
+        # Turn these into the FireFly Account object.  Some data returned doesn't fit into that class.
+        data_dict = response["data"]
+        dd_a = data_dict["attributes"]
+        del data_dict["links"]
+        aa = AccountAttributes(
+            created_at=dd_a["created_at"],
+            updated_at=dd_a["updated_at"],
+            active=dd_a["active"],
+            name=dd_a["name"],
+            type=dd_a["type"],
+            account_role=dd_a["account_role"],
+            currency_id=dd_a["currency_id"],
+            currency_code=dd_a["currency_code"],
+            currency_symbol=dd_a["currency_symbol"],
+            currency_decimal_places=dd_a["currency_decimal_places"],
+            native_currency_id=dd_a.get("native_currency_id", None),
+            native_currency_code=dd_a.get("native_currency_code", None),
+            native_currency_symbol=dd_a.get("native_currency_symbol", None),
+            native_currency_decimal_places=dd_a.get("native_currency_decimal_places", None),
+            current_balance=dd_a["current_balance"],
+            native_current_balance=dd_a.get("native_current_balance", None),
+            current_balance_date=dd_a["current_balance_date"],
+            order=dd_a["order"],
+            notes=dd_a["notes"],
+            monthly_payment_date=dd_a["monthly_payment_date"],
+            credit_card_type=dd_a["credit_card_type"],
+            account_number=dd_a["account_number"],
+            iban=dd_a["iban"],
+            bic=dd_a["bic"],
+            virtual_balance=dd_a["virtual_balance"],
+            native_virtual_balance=dd_a.get("native_virtual_balance", None),
+            opening_balance=dd_a["opening_balance"],
+            native_opening_balance=dd_a.get("native_opening_balance", None),
+            opening_balance_date=dd_a["opening_balance_date"],
+            liability_type=dd_a["liability_type"],
+            liability_direction=dd_a["liability_direction"],
+            interest=dd_a["interest"],
+            interest_period=dd_a["interest_period"],
+            current_debt=dd_a.get("current_debt", None),
+            include_net_worth=dd_a["include_net_worth"],
+            longitude=dd_a["longitude"],
+            latitude=dd_a["latitude"],
+            zoom_level=dd_a["zoom_level"],
+            last_activity=dd_a["last_activity"],
+        )
+        data_dict["attributes"] = aa
+        return Account(**data_dict)
 
     async def get_transactions(
         self,
