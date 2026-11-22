@@ -24,7 +24,6 @@ from pyfirefly.exceptions import (
 from pyfirefly.models import (
     About,
     Account,
-    AccountAttributes,
     Bill,
     Budget,
     BudgetLimitAttributes,
@@ -287,54 +286,7 @@ class Firefly:
                 "zoom_level": account.attributes.zoom_level,
             },
         )
-
-        # Turn these into the FireFly Account object.  Some data returned doesn't fit into that class.
-        data_dict = response["data"]
-        dd_a = data_dict["attributes"]
-        del data_dict["links"]
-        aa = AccountAttributes(
-            created_at=dd_a["created_at"],
-            updated_at=dd_a["updated_at"],
-            active=dd_a["active"],
-            name=dd_a["name"],
-            type=dd_a["type"],
-            account_role=dd_a["account_role"],
-            currency_id=dd_a["currency_id"],
-            currency_code=dd_a["currency_code"],
-            currency_symbol=dd_a["currency_symbol"],
-            currency_decimal_places=dd_a["currency_decimal_places"],
-            native_currency_id=dd_a.get("native_currency_id", None),
-            native_currency_code=dd_a.get("native_currency_code", None),
-            native_currency_symbol=dd_a.get("native_currency_symbol", None),
-            native_currency_decimal_places=dd_a.get("native_currency_decimal_places", None),
-            current_balance=dd_a["current_balance"],
-            native_current_balance=dd_a.get("native_current_balance", None),
-            current_balance_date=dd_a["current_balance_date"],
-            order=dd_a["order"],
-            notes=dd_a["notes"],
-            monthly_payment_date=dd_a["monthly_payment_date"],
-            credit_card_type=dd_a["credit_card_type"],
-            account_number=dd_a["account_number"],
-            iban=dd_a["iban"],
-            bic=dd_a["bic"],
-            virtual_balance=dd_a["virtual_balance"],
-            native_virtual_balance=dd_a.get("native_virtual_balance", None),
-            opening_balance=dd_a["opening_balance"],
-            native_opening_balance=dd_a.get("native_opening_balance", None),
-            opening_balance_date=dd_a["opening_balance_date"],
-            liability_type=dd_a["liability_type"],
-            liability_direction=dd_a["liability_direction"],
-            interest=dd_a["interest"],
-            interest_period=dd_a["interest_period"],
-            current_debt=dd_a.get("current_debt", None),
-            include_net_worth=dd_a["include_net_worth"],
-            longitude=dd_a["longitude"],
-            latitude=dd_a["latitude"],
-            zoom_level=dd_a["zoom_level"],
-            last_activity=dd_a["last_activity"],
-        )
-        data_dict["attributes"] = aa
-        return Account(**data_dict)
+        return Account.from_dict(response["data"])
 
     async def get_transactions(
         self,
