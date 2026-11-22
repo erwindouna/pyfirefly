@@ -11,7 +11,7 @@ from typing import Any, Self
 from urllib.parse import urlparse
 
 from aiohttp import ClientError, ClientResponseError, ClientSession
-from aiohttp.hdrs import METH_GET
+from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST
 from yarl import URL
 
 from pyfirefly.exceptions import (
@@ -82,6 +82,7 @@ class Firefly:
         *,
         method: str = METH_GET,
         params: dict[str, Any] | None = None,
+        data: Any = None,
     ) -> Any:
         """Handle a request to the Python Firefly API.
 
@@ -90,6 +91,7 @@ class Firefly:
             uri: Request URI, without '/api/', for example, 'status'.
             method: HTTP method to use.
             params: Extra options to improve or limit the response.
+            data: Data to send if method is METH_POST
 
         Returns:
         -------
@@ -125,6 +127,7 @@ class Firefly:
                     url,
                     headers=headers,
                     params=params,
+                    json=data,
                 )
                 response.raise_for_status()
         except TimeoutError as err:
@@ -137,11 +140,20 @@ class Firefly:
             if err.status == 404:
                 msg = f"Resource not found at {method} {url}: {err}"
                 raise FireflyNotFoundError(msg) from err
+            if err.status == 422:
+                json_response = await response.json()
+                msg = f"Validation error for POST to {url}. "
+                msg += " ".join([i[0] for i in json_response["errors"].values()])
+                raise FireflyError(msg) from err
             msg = f"Connection error for {method} {url}: {err}"
             raise FireflyConnectionError(msg) from err
         except (ClientError, socket.gaierror) as err:
             msg = f"Unexpected error during {method} {url}: {err}"
             raise FireflyConnectionError(msg) from err
+
+        if response.status == 204:
+            # Must have been a METH_DELETE. There is no data to return, so return early.
+            return None
 
         content_type = response.headers.get("Content-Type", "")
         if "application/json" not in content_type and "application/vnd.api+json" not in content_type:
@@ -153,92 +165,6 @@ class Firefly:
             )
 
         return await response.json()
-
-    async def _delete(self, uri: str) -> None:
-        url = URL.build(
-            scheme=self._api_scheme,
-            host=self._api_host,
-            port=self._api_port,
-            path="/api/v1/",
-        ).join(URL(uri))
-
-        headers = {
-            "Accept": "application/json, text/plain",
-            "User-Agent": f"PythonFirefly/{VERSION}",
-            "Authorization": f"Bearer {self._api_key}",
-        }
-
-        if self._session is None:
-            self._session = ClientSession()
-            self._close_session = True
-
-        try:
-            async with asyncio.timeout(self._request_timeout):
-                response = await self._session.delete(
-                    url,
-                    headers=headers,
-                )
-                response.raise_for_status()
-        except TimeoutError as err:
-            msg = f"Timeout error while POSTing {url}: {err}"
-            raise FireflyTimeoutError(msg) from err
-        except ClientResponseError as err:
-            if err.status == 401:
-                msg = f"Authentication failed for POST {url}: Invalid API key"
-                raise FireflyAuthenticationError(msg) from err
-            if err.status == 404:
-                msg = f"Resource not found at POSTing {url}: {err}"
-                raise FireflyNotFoundError(msg) from err
-            raise FireflyConnectionError(msg) from err
-        except (ClientError, socket.gaierror) as err:
-            msg = f"Unexpected error during POST to {url}: {err}"
-            raise FireflyConnectionError(msg) from err
-
-    async def _post(self, uri: str, data: Any) -> Any:
-        url = URL.build(
-            scheme=self._api_scheme,
-            host=self._api_host,
-            port=self._api_port,
-            path="/api/v1/",
-        ).join(URL(uri))
-
-        headers = {
-            "Accept": "application/json, text/plain",
-            "User-Agent": f"PythonFirefly/{VERSION}",
-            "Authorization": f"Bearer {self._api_key}",
-        }
-
-        if self._session is None:
-            self._session = ClientSession()
-            self._close_session = True
-
-        try:
-            async with asyncio.timeout(self._request_timeout):
-                response = await self._session.post(url, headers=headers, json=data)
-                # If we get a 422 error we need the data from the response for that error handling.
-                # Hence we get that information now, prior to raise_for_status()
-                json_response = await response.json()
-                response.raise_for_status()
-        except TimeoutError as err:
-            msg = f"Timeout error while POSTing {url}: {err}"
-            raise FireflyTimeoutError(msg) from err
-        except ClientResponseError as err:
-            if err.status == 401:
-                msg = f"Authentication failed for POST {url}: Invalid API key"
-                raise FireflyAuthenticationError(msg) from err
-            if err.status == 404:
-                msg = f"Resource not found at POSTing {url}: {err}"
-                raise FireflyNotFoundError(msg) from err
-            if err.status == 422:
-                msg = f"Validation error for POST to {url}. "
-                msg += " ".join([i[0] for i in json_response["errors"].values()])
-                raise FireflyError(msg) from err
-            raise FireflyConnectionError(msg) from err
-        except (ClientError, socket.gaierror) as err:
-            msg = f"Unexpected error during POST to {url}: {err}"
-            raise FireflyConnectionError(msg) from err
-
-        return json_response
 
     def _format_date(self, date_value: datetime | str) -> str:
         """Format a date value to a string in 'YYYY-MM-DD' format.
@@ -304,8 +230,9 @@ class Firefly:
         """
         uri = f"accounts/{account.id}"
 
-        await self._delete(
+        await self._request(
             uri=uri,
+            method=METH_DELETE,
         )
 
     async def create_account(self, account: Account) -> Account:
@@ -330,8 +257,9 @@ class Firefly:
         # array with the necessary account information or key=value pairs, and
         # gives an example.
 
-        response = await self._post(
+        response = await self._request(
             uri=uri,
+            method=METH_POST,
             data={
                 "type": account.type,
                 "name": account.attributes.name,
