@@ -11,7 +11,7 @@ from typing import Any, Self
 from urllib.parse import urlparse
 
 from aiohttp import ClientError, ClientResponseError, ClientSession
-from aiohttp.hdrs import METH_GET
+from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST
 from yarl import URL
 
 from pyfirefly.exceptions import (
@@ -81,6 +81,7 @@ class Firefly:
         *,
         method: str = METH_GET,
         params: dict[str, Any] | None = None,
+        data: Any = None,
     ) -> Any:
         """Handle a request to the Python Firefly API.
 
@@ -89,6 +90,7 @@ class Firefly:
             uri: Request URI, without '/api/', for example, 'status'.
             method: HTTP method to use.
             params: Extra options to improve or limit the response.
+            data: Data to send if method is METH_POST
 
         Returns:
         -------
@@ -124,6 +126,7 @@ class Firefly:
                     url,
                     headers=headers,
                     params=params,
+                    json=data,
                 )
                 response.raise_for_status()
         except TimeoutError as err:
@@ -136,11 +139,20 @@ class Firefly:
             if err.status == 404:
                 msg = f"Resource not found at {method} {url}: {err}"
                 raise FireflyNotFoundError(msg) from err
+            if err.status == 422:
+                json_response = await response.json()
+                msg = f"Validation error for POST to {url}. "
+                msg += " ".join([i[0] for i in json_response["errors"].values()])
+                raise FireflyError(msg) from err
             msg = f"Connection error for {method} {url}: {err}"
             raise FireflyConnectionError(msg) from err
         except (ClientError, socket.gaierror) as err:
             msg = f"Unexpected error during {method} {url}: {err}"
             raise FireflyConnectionError(msg) from err
+
+        if response.status == 204:
+            # Must have been a METH_DELETE. There is no data to return, so return early.
+            return None
 
         content_type = response.headers.get("Content-Type", "")
         if "application/json" not in content_type and "application/vnd.api+json" not in content_type:
@@ -206,6 +218,75 @@ class Firefly:
             next_page = current_page + 1 if current_page < total_pages else None
 
         return [Account.from_dict(acc) for acc in accounts]
+
+    async def delete_account(self, account: Account) -> None:
+        """Delete a account.
+
+        Args:
+        ----
+            account: Account object to delete.
+
+        """
+        uri = f"accounts/{account.id}"
+
+        await self._request(
+            uri=uri,
+            method=METH_DELETE,
+        )
+
+    async def create_account(self, account: Account) -> Account:
+        """Create a account.
+
+        Args:
+        ----
+            account: Account object to create. id attribute is ignored.
+
+        Returns:
+        -------
+            A new account object, with the id attribute set.
+
+        """
+        uri = "accounts"
+
+        # translate account object into a data structure that is acceptable to
+        # aiohttp post() method. THe documentation says this is can be a FormData
+        # object or anything that can be passed into FormData, e.g. a dictionary,
+        # bytes, or file-like object.
+        # But also the fireflyiii /v1/accounts POST API endpoint is expecting a json
+        # array with the necessary account information or key=value pairs, and
+        # gives an example.
+
+        response = await self._request(
+            uri=uri,
+            method=METH_POST,
+            data={
+                "type": account.type,
+                "name": account.attributes.name,
+                "currency_id": account.attributes.currency_id,
+                "currency_code": account.attributes.currency_code,
+                "include_net_worth": True,
+                "notes": account.attributes.notes,
+                "account_role": account.attributes.account_role,
+                "liability_type": account.attributes.liability_type,
+                "liability_direction": account.attributes.liability_direction,
+                "iban": account.attributes.iban,
+                "bic": account.attributes.bic,
+                "account_number": account.attributes.account_number,
+                "opening_balance": account.attributes.opening_balance,
+                "opening_balance_date": account.attributes.opening_balance_date,
+                "virtual_balance": account.attributes.virtual_balance,
+                "active": account.attributes.active,
+                "order": account.attributes.order,
+                "credit_card_type": account.attributes.credit_card_type,
+                "monthly_payment_date": account.attributes.monthly_payment_date,
+                "interest": float(account.attributes.interest) if account.attributes.interest is not None else 0.0,
+                "interest_period": account.attributes.interest_period,
+                "latitude": account.attributes.latitude,
+                "longitude": account.attributes.longitude,
+                "zoom_level": account.attributes.zoom_level,
+            },
+        )
+        return Account.from_dict(response["data"])
 
     async def get_transactions(
         self,
