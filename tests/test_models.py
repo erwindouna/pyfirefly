@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from aresponses import ResponsesMockServer
 from syrupy.assertion import SnapshotAssertion
 
+from pyfirefly.models import Account
 from tests import load_fixtures
 
 if TYPE_CHECKING:
@@ -55,6 +57,27 @@ async def test_accounts_model(
 
     accounts = await firefly_client.get_accounts()
     assert accounts == snapshot
+
+
+async def test_accounts_model_create(
+    aresponses: ResponsesMockServer,
+    firefly_client: Firefly,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test creating the Accounts model."""
+    aresponses.add(
+        "localhost:9000",
+        "/api/v1/accounts",
+        "POST",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/vnd.api+json"},
+            text=load_fixtures("new_account.json"),
+        ),
+    )
+
+    new_account = await firefly_client.create_account(account=Account.from_dict(json.loads(load_fixtures("new_account.json"))["data"]))
+    assert new_account == snapshot
 
 
 async def test_account_transactions_model(
