@@ -6,7 +6,7 @@ repos:
         name: 🐶 Ruff Linter
         language: system
         types: [python]
-        entry: uv run --frozen ruff check --fix
+        entry: uv run check --fix
         require_serial: true
         stages: [pre-commit, pre-push, manual]
       - id: ruff-format
